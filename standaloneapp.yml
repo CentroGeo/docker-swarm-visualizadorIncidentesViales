@@ -33,6 +33,7 @@ services:
           - traefik.http.services.visualizador-secured.loadbalancer.server.port=3838 # ask Traefik to search for port 3838 of the visualizador app service container
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /efs/cache:/cache_dir
 
 networks:
   traefik-public:
