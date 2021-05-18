@@ -3,7 +3,7 @@ version: '3.3'
 services:
 
   visualizador:
-    image: centrogeo/visualizadorincidentesviales:v0.9.1.3
+    image: centrogeo/visualizadorincidentesviales:latest
     # The labels section is where you specify configuration values for Traefik.
     # Docker labels don’t do anything by themselves, but Traefik reads these so
     # it knows how to treat containers.
