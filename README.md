@@ -48,28 +48,42 @@ docker swarm init
 docker network create --driver=overlay traefik-public
 ````
 ### Configurar y desplegar Traefik
+Primero configuramos la red del nodo en donde va a correr traefik y le decimos que va a usar un certificado público (para https). Simplemente estamos guardando el id del nodo en una variable de entorno y actualizando el nodo con esa información para que traefik configure el certificado,
 ````bash
 export NODE_ID=$(docker info -f '{{.Swarm.NodeID}}')
 docker node update --label-add traefik-public.traefik-public-certificates=true $NODE_ID
-# Dominio (debe estar configurado en un DNS)
+````
+### Dominio de traefik 
+Ahora configuramos el dominio para traefik (en este caso el dominio traefik.sys.app.example.com debe apuntar a la ip pública del nodo). También configuramos un usuario y contraseña (autenticación básica) para el Dashboard de traefik
+````bash
 export EMAIL=admin@example.com
 export DOMAIN=traefik.sys.app.example.com
 # Para traefik
 export USERNAME=admin
 export HASHED_PASSWORD=$(openssl passwd -apr1)
-git clone git@github.com:CentroGeo/docker-swarm-visualizadorIncidentesViales.git
+````
+### Servicio de traefik
+Clonamos este repositorio y utilizamos la configuración que viene en el archivo yml para desplegar el servicio.
+````bash
+git clone https://github.com/CentroGeo/docker-swarm-visualizadorIncidentesViales.git
 cd docker-swarm-visualizadorIncidentesViales
 docker stack deploy -c traefik.yml traefik
 ````
 
-### Visualizador (la url debe estar configurada en un DNS)
+### Visualizador 
+Primero configuramos (en una variable de entorno que se va a usar adentro del yml que levanta el servicio) el dominio de la aplicación. Otra vez, app.example.com (la url que vayamos a usar) debe apuntar a la ip pública del nodo manager.
 ````bash
 export APP_DOMAIN=app.example.com
-# red interna
+````
+Después configuramos la red interna que van a utilizar los nodos para comunicarse entre sí, sin importar si residen en diferentes computadoras físicas.
+````bash
 docker network create --driver=overlay sp-net
-# levantar el visualizador
+````
+Finalmente, levantamos el servicio del visualizador
+````bash
 docker stack deploy -c standaloneapp.yml app
 ````
+Si visitamos app.example.com (después de un par de minutos), debemos ver el visualizador
 
 ### Escalar el servicio
 Primero tenemos que unir cada nuevo nodo al Swarm, para eso necesitamos el token del manager que podemos obtener haciendo:
